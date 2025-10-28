@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ecolistic Living — Real Shop + Fake Payments</title>
+  <style>
+    :root{
+      --accent:#1e7a3a; --bg:#f4faf5; --card:#fff; --muted:#6b7a6b;
+      font-family:Inter,system-ui,sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:#0b2a13;}
+    .app{max-width:520px;margin:8px auto;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;border-radius:12px;}
+    header{background:linear-gradient(90deg,var(--accent),#2ea560);color:#fff;padding:14px 16px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:12px}
+    header h1{margin:0;font-size:18px}
+    main{flex:1;padding:14px}
+    .page{display:none}
+    .page.active{display:block}
+    .card{background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:0 6px 18px rgba(10,30,10,0.04)}
+    .btn{padding:8px 12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+    .btn.secondary{background:#2ea560}
+    .row{display:flex;gap:10px;align-items:center}
+    .muted{color:var(--muted);font-size:13px}
+    .bottom-nav{display:flex;gap:6px;padding:10px;border-top:1px solid rgba(0,0,0,0.06);background:transparent;border-radius:0 0 12px 12px}
+    .tab{flex:1;text-align:center;padding:8px;border-radius:8px;color:var(--accent);font-weight:700;cursor:pointer}
+    .tab.active{background:rgba(30,122,58,0.08)}
+    video{width:100%;border-radius:10px;background:#000;max-height:360px}
+    .thumb{width:64px;height:64px;border-radius:10px;object-fit:cover}
+    .product{display:flex;gap:12px;align-items:center;padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);margin-bottom:10px;background:linear-gradient(180deg,#fff,#f8fff8)}
+    .product img{width:84px;height:84px;border-radius:10px;object-fit:cover}
+    .price{font-weight:800;color:var(--accent)}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
+    .modal{width:92%;max-width:420px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
+    .small{font-size:13px;color:var(--muted)}
+    .input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6efe6;margin-top:8px}
+    .center{text-align:center}
+    @media(min-width:720px){.app{margin:20px auto}}
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <header>
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 7 6 7 10C7 13.3137 9.68629 16 13 16C16.3137 16 19 13.3137 19 10C19 6 12 2 12 2Z" fill="white" opacity="0.95"/><path d="M5 20C5 17 8.134 15 11 15H13C15.866 15 19 17 19 20" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
+      <div style="flex:1">
+        <h1>Ecolistic Living</h1>
+        <div class="muted" style="font-size:13px">Small steps — proven with a snap 🌱</div>
+      </div>
+      <div id="pointsTop" style="font-weight:900">0 pts</div>
+    </header>
+
+    <main>
+      <!-- HOME -->
+      <section id="home" class="page active">
+        <div class="card">
+          <h2>Welcome to Ecolistic</h2>
+          <p class="muted">Scan a quick photo of you doing the task to verify and earn points. Camera permission is requested once per session.</p>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="navigate('progress')">Start Progress</button>
+            <button class="btn secondary" onclick="navigate('shop')">Browse Shop</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Your Eco Score</h3>
+          <div style="font-size:26px;font-weight:900" id="ecoScore">0</div>
+          <div class="muted">Verify tasks to increase your score and unlock rewards.</div>
+        </div>
+      </section>
+
+      <!-- PROGRESS -->
+      <section id="progress" class="page">
+        <div class="card">
+          <h2>Track Progress</h2>
+          <p class="muted">Click <strong>Mark Done</strong> to open camera and capture proof. Photo stored locally as thumbnail.</p>
+          <div id="actionsList"></div>
+        </div>
+      </section>
+
+      <!-- SCAN -->
+      <section id="scan" class="page">
+        <div class="card">
+          <h2>Scan Proof</h2>
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="snap" style="display:none"></canvas>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="takeSnapshot()">📸 Capture Proof</button>
+            <button style="padding:8px 12px;background:#eee;border-radius:10px;border:0;cursor:pointer" onclick="stopCamera()">Stop Camera</button>
+          </div>
+          <div id="scanInfo" class="muted" style="margin-top:8px"></div>
+        </div>
+      </section>
+
+      <!-- SHOP -->
+      <section id="shop" class="page">
+        <div class="card">
+          <h2>Eco Shop</h2>
+          <div id="productsWrap"></div>
+        </div>
+      </section>
+
+      <!-- REWARDS -->
+      <section id="rewards" class="page">
+        <div class="card">
+          <h2>Rewards</h2>
+          <p class="muted">Redeem 100 points → ₹100 voucher (demo).</p>
+          <div class="row" style="margin-top:8px">
+            <button class="btn" onclick="redeem(100)">Redeem 100 pts</button>
+            <div id="redeemMsg" class="muted" style="margin-left:8px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PREMIUM -->
+      <section id="premium" class="page">
+        <div class="card">
+          <h2>Premium — ₹99 / month (demo)</h2>
+          <p class="muted">Subscribe to get <strong>2× points</strong> on verified tasks and occasional free vouchers. (Demo flow — no real payment)</p>
+          <div class="row" style="margin-top:10px">
+            <button class="btn" onclick="subscribe()">Subscribe ₹99 (demo)</button>
+            <button class="btn secondary" onclick="unsubscribe()">Cancel</button>
+          </div>
+          <div id="subMsg" class="muted" style="margin-top:8px"></div>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="page">
+        <div class="card">
+          <h2>About Us</h2>
+          <p class="muted">Team Ecolistic</p>
+          <ul>
+            <li>Parth Kandoi</li>
+            <li>Vriti</li>
+            <li>Ridhima P</li>
+            <li>Nischith Gowda</li>
+            <li>Meera G</li>
+            <li>Reeneka</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- FEEDBACK -->
+      <section id="feedback" class="page">
+        <div class="card">
+          <h2>Feedback</h2>
+          <textarea id="fb" style="width:100%;height:80px;border-radius:8px;padding:8px;border:1px solid #e8f3ea"></textarea>
+          <div style="margin-top:8px">
+            <button class="btn" onclick="submitFeedback()">Submit</button>
+            <div id="fbMsg" class="muted" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <div class="tab active" data-target="home" onclick="navTab(event)">Home</div>
+      <div class="tab" data-target="progress" onclick="navTab(event)">Progress</div>
+      <div class="tab" data-target="scan" onclick="navTab(event)">Scan</div>
+      <div class="tab" data-target="shop" onclick="navTab(event)">Shop</div>
+      <div class="tab" data-target="rewards" onclick="navTab(event)">Rewards</div>
+      <div class="tab" data-target="premium" onclick="navTab(event)">Premium</div>
+      <div class="tab" data-target="about" onclick="navTab(event)">About</div>
+      <div class="tab" data-target="feedback" onclick="navTab(event)">Feedback</div>
+    </nav>
+  </div>
+
+  <!-- Fake Payment Modal (hidden by default) -->
+  <div id="modalRoot" style="display:none"></div>
+
+  <script>
+    /* ------------- State & Persistence ------------- */
+    const STORAGE_KEY = 'ecolistic_v3';
+    let state = {
+      points: 0,
+      score: 0,
+      premium: false,
+      actions: [
+        {id:1, text:'Used reusable bottle', done:false, img:''},
+        {id:2, text:'Carried cloth bag', done:false, img:''},
+        {id:3, text:'Composted waste', done:false, img:''}
+      ],
+      products: [],
+      pendingScan: null
+    };
+
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function load(){ const s = localStorage.getItem(STORAGE_KEY); if(s) state = JSON.parse(s); }
+
+    /* ------------- Camera persistence ------------- */
+    let stream = null;
+    let cameraReady = false;
+    async function startCameraIfNeeded(){
+      if(cameraReady) return true;
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        const v = document.getElementById('video');
+        v.srcObject = stream;
+        cameraReady = true;
+        document.getElementById('scanInfo').innerText = 'Camera ready — perform your eco action and capture proof.';
+        return true;
+      }catch(err){
+        cameraReady = false;
+        document.getElementById('scanInfo').innerText = 'Camera permission denied or not available.';
+        return false;
+      }
+    }
+    function stopCamera(){
+      if(stream){
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+        cameraReady = false;
+        document.getElementById('scanInfo').innerText = 'Camera stopped.';
+      }
+    }
+
+    /* ------------- Navigation ------------- */
+    function navTab(e){
+      const id = e.currentTarget.dataset.target;
+      document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.target === id));
+      navigate(id);
+    }
+    function navigate(id){
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const el = document.getElementById(id);
+      if(el) el.classList.add('active');
+      if(id === 'scan') startCameraIfNeeded();
+      refreshUI();
+    }
+
+    /* ------------- Products (matching images via Unsplash queries) ------------- */
+    function loadProductsList(){
+      // Use Unsplash query-based images (these return relevant photos)
+      state.products = [
+        {id:'p1', key:'bottle', name:'Reusable Water Bottle', price:499, pts:50, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
+        {id:'p2', key:'toothbrush', name:'Bamboo Toothbrush (2-pack)', price:149, pts:20, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
+        {id:'p3', key:'bag', name:'Cloth Shopping Bag', price:299, pts:30, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
+        {id:'p4', key:'straws', name:'Steel Straw Set', price:199, pts:18, desc:'Reusable steel straw set with cleaner', img:'https://source.unsplash.com/600x600/?steel,straws'},
+        {id:'p5', key:'compost', name:'Compost Bin (Mini)', price:699, pts:70, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
+        {id:'p6', key:'solar', name:'Solar Power Bank', price:1299, pts:120, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
+      ];
+    }
+
+    /* ------------- Renderers ------------- */
+    function renderProducts(){
+      const wrap = document.getElementById('productsWrap');
+      wrap.innerHTML = '';
+      state.products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product';
+        card.innerHTML = `
+          <img src="${p.img}" alt="${p.name}" loading="lazy" />
+          <div style="flex:1">
+            <div style="font-weight:800">${p.name}</div>
+            <div class="muted" style="font-size:13px">${p.desc}</div>
+            <div style="margin-top:6px" class="muted small">Earn ${p.pts} pts on purchase</div>
+          </div>
+          <div style="text-align:right">
+            <div class="price">₹${p.price}</div>
+            <div style="margin-top:6px"><button class="btn" onclick="openPurchaseModal('${p.id}')">Buy</button></div>
+          </div>
+        `;
+        wrap.appendChild(card);
+      });
+    }
+
+    function renderActions(){
+      const wrap = document.getElementById('actionsList');
+      wrap.innerHTML = '';
+      state.actions.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const imgHtml = a.img ? `<img src="${a.img}" class="thumb" style="float:right;margin-left:8px"/>` : '';
+        const doneHtml = a.done ? `<div style="font-weight:800;color:green">Verified ✓</div>` : `<button class="btn" onclick="startProof(${a.id})">Mark Done</button>`;
+        card.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1"><div style="font-weight:700">${a.text}</div>${imgHtml}</div>
+          <div>${doneHtml}</div>
+        </div>`;
+        wrap.appendChild(card);
+      });
+    }
+
+    function refreshUI(){
+      document.getElementById('pointsTop').innerText = state.points + ' pts';
+      const scoreEl = document.getElementById('ecoScore'); if(scoreEl) scoreEl.innerText = state.score;
+      renderActions();
+      renderProducts();
+      const submsg = document.getElementById('subMsg'); if(submsg) submsg.innerText = state.premium ? 'Premium active (demo): 2× points enabled.' : 'Not subscribed.';
+    }
+
+    /* ------------- Scan flow ------------- */
+    function startProof(actionId){
+      state.pendingScan = actionId;
+      save();
+      navigate('scan');
+    }
+
+    function takeSnapshot(){
+      if(!stream){ alert('Camera not available. Please allow camera permission and try again.'); return; }
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('snap');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      if(state.pendingScan){
+        const act = state.actions.find(x => x.id === state.pendingScan);
+        if(act && !act.done){
+          act.done = true;
+          act.img = dataUrl;
+          const pts = state.premium ? 20 : 10;
+          state.points += pts;
+          state.score += 5;
+          state.pendingScan = null;
+          save();
+          refreshUI();
+          showTinyToast(`✅ Verified — you earned ${pts} pts!`);
+          navigate('progress');
+        } else {
+          document.getElementById('scanInfo').innerText = 'No pending task to verify.';
+        }
+      } else {
+        document.getElementById('scanInfo').innerText = 'No pending task. Go to Progress and tap Mark Done on a task first.';
+      }
+    }
+
+    /* ------------- Fake Payment Modal ------------- */
+    function openPurchaseModal(productId){
+      const p = state.products.find(x => x.id === productId);
+      if(!p) return;
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = `
+        <div class="modal-backdrop" id="modalBack">
+          <div class="modal" role="dialog" aria-modal="true">
+            <div style="display:flex;align-items:center;gap:12px">
+              <img src="${p.img}" alt="${p.name}" style="width:84px;height:84px;border-radius:8px;object-fit:cover"/>
+              <div style="flex:1">
+                <div style="font-weight:800">${p.name}</div>
+                <div class="muted small">${p.desc}</div>
+                <div style="margin-top:8px" class="price">₹${p.price}</div>
+              </div>
+            </div>
+            <hr style="margin:12px 0;border:none;border-top:1px solid #eee"/>
+            <div class="small">Demo Checkout — enter any card details to simulate payment</div>
+            <input class="input" id="cardName" placeholder="Name on card" />
+            <input class="input" id="cardNumber" placeholder="Card number (demo)" />
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input class="input" id="exp" placeholder="MM/YY" style="flex:1"/>
+              <input class="input" id="cvv" placeholder="CVV" style="width:100px"/>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:14px;align-items:center">
+              <button class="btn" id="payBtn">Pay ₹${p.price}</button>
+              <button style="padding:8px 12px;border-radius:10px;border:0;background:#eee;cursor:pointer" onclick="closeModal()">Cancel</button>
+              <div id="payStatus" style="margin-left:auto" class="small muted"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      root.style.display = 'block';
+      document.getElementById('payBtn').onclick = () => simulatePayment(p);
+      document.getElementById('modalBack').onclick = (e) => { if(e.target.id === 'modalBack') closeModal(); };
+    }
+
+    function showTinyToast(msg){
+      // small non-blocking message
+      const el = document.createElement('div');
+      el.style.position='fixed'; el.style.bottom='92px'; el.style.left='50%'; el.style.transform='translateX(-50%)';
+      el.style.background='rgba(0,0,0,0.8)'; el.style.color='#fff'; el.style.padding='10px 14px'; el.style.borderRadius='10px'; el.style.zIndex=9999;
+      el.innerText = msg;
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),2600);
+    }
+
+    function simulatePayment(product){
+      const payStatus = document.getElementById('payStatus');
+      const payBtn = document.getElementById('payBtn');
+      payBtn.disabled = true;
+      payBtn.innerText = 'Processing...';
+      payStatus.innerText = '';
+      // fake network / processing delay
+      setTimeout(() => {
+        // success
+        payBtn.innerText = 'Success';
+        payStatus.innerText = 'Payment successful ✓';
+        // award points and maybe give "voucher" or order id
+        state.points += product.pts;
+        state.score += Math.round(product.pts / 4);
+        save();
+        refreshUI();
+        setTimeout(() => {
+          closeModal();
+          showTinyToast(`Payment success — earned ${product.pts} pts!`);
+        }, 700);
+      }, 1400);
+    }
+
+    function closeModal(){
+      const root = document.getElementById('modalRoot');
+      root.innerHTML = ''; root.style.display = 'none';
+    }
+
+    /* ------------- Shop / Rewards / Subscribe actions ------------- */
+    function buyProduct(pid){ openPurchaseModal(pid); } // kept for backward compatibility
+
+    function redeem(cost){
+      const msg = document.getElementById('redeemMsg');
+      msg.innerText = '';
+      if(state.points >= cost){
+        state.points -= cost; save(); refreshUI();
+        msg.innerText = `Redeemed ${cost} pts → ₹${cost} voucher (demo).`;
+      } else {
+        msg.innerText = 'Not enough points.';
+      }
+    }
+
+    function subscribe(){
+      if(confirm('Subscribe to Premium for ₹99/month? (Demo — no real payment)')){
+        state.premium = true; save(); refreshUI(); alert('Subscribed to Premium (demo) — 2× points enabled!');
+      }
+    }
+    function unsubscribe(){
+      state.premium = false; save(); refreshUI(); alert('Premium cancelled (demo).');
+    }
+
+    function submitFeedback(){
+      const val = document.getElementById('fb').value.trim();
+      if(!val){ alert('Please type feedback'); return; }
+      document.getElementById('fbMsg').innerText = 'Thanks for the feedback! 💚';
+      document.getElementById('fb').value = '';
+    }
+
+    /* ------------- Init ------------- */
+    function init(){
+      load();
+      loadProductsList(); // fill product images/metadata
+      // ensure state.products uses our list (so points/prices match)
+      if(!state.products || state.products.length === 0) state.products = JSON.parse(JSON.stringify(state.products));
+      // override state.products with the curated list (safer)
+      state.products = [
+        {id:'p1', name:'Reusable Water Bottle', price:499, pts:50, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
+        {id:'p2', name:'Bamboo Toothbrush (2-pack)', price:149, pts:20, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
+        {id:'p3', name:'Cloth Shopping Bag', price:299, pts:30, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
+        {id:'p4', name:'Steel Straw Set', price:199, pts:18, desc:'Reusable steel straw set with cleaner', img:'https://source.unsplash.com/600x600/?steel,straws'},
+        {id:'p5', name:'Compost Bin (Mini)', price:699, pts:70, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
+        {id:'p6', name:'Solar Power Bank', price:1299, pts:120, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
+      ];
+      save();
+      refreshUI();
+      window.addEventListener('beforeunload', stopCamera);
+    }
+
+    // run
+    init();
+  </script>
+</body>
+</html>
