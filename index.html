@@ -45,8 +45,7 @@
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 7 6 7 10C7 13.3137 9.68629 16 13 16C16.3137 16 19 13.3137 19 10C19 6 12 2 12 2Z" fill="white" opacity="0.95"/><path d="M5 20C5 17 8.134 15 11 15H13C15.866 15 19 17 19 20" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
       <div style="flex:1">
         <h1>Ecolistic Living</h1>
-        <div class="muted" style="font-size:13px">Small steps — proven with a snap 🌱</div>
-      </div>
+        <div class="muted" style="font-size:200x">Small steps can make a big difference!</div>
       <div id="pointsTop" style="font-weight:900">0 pts</div>
     </header>
 
@@ -63,8 +62,8 @@
         </div>
 
         <div class="card">
-          <h3>Your Eco Score</h3>
-          <div style="font-size:26px;font-weight:900" id="ecoScore">0</div>
+          <h3>Your EcoPoints</h3>
+          <div style="font-size:26px;font-weight:900"	id="ecoPoint>0</div>
           <div class="muted">Verify tasks to increase your score and unlock rewards.</div>
         </div>
       </section>
@@ -104,9 +103,9 @@
       <section id="rewards" class="page">
         <div class="card">
           <h2>Rewards</h2>
-          <p class="muted">Redeem 100 points → ₹100 voucher (demo).</p>
+          <p class="muted">Redeem 150 points → ₹50 voucher (demo).</p>
           <div class="row" style="margin-top:8px">
-            <button class="btn" onclick="redeem(100)">Redeem 100 pts</button>
+            <button class="btn" onclick="redeem(150)">Redeem 50 pts</button>
             <div id="redeemMsg" class="muted" style="margin-left:8px"></div>
           </div>
         </div>
@@ -132,11 +131,12 @@
           <p class="muted">Team Ecolistic</p>
           <ul>
             <li>Parth Kandoi</li>
-            <li>Vriti</li>
-            <li>Ridhima P</li>
+            <li>Vriti Bhagath</li>
+            <li>Ridhima Paida</li>
             <li>Nischith Gowda</li>
-            <li>Meera G</li>
-            <li>Reeneka</li>
+            <li>Meera Gupta</li>
+            <li>Reeneka Saha</li>
+	    <li>Ishaan CN</li>
           </ul>
         </div>
       </section>
@@ -233,12 +233,11 @@
     function loadProductsList(){
       // Use Unsplash query-based images (these return relevant photos)
       state.products = [
-        {id:'p1', key:'bottle', name:'Reusable Water Bottle', price:499, pts:50, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
-        {id:'p2', key:'toothbrush', name:'Bamboo Toothbrush (2-pack)', price:149, pts:20, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
-        {id:'p3', key:'bag', name:'Cloth Shopping Bag', price:299, pts:30, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
-        {id:'p4', key:'straws', name:'Steel Straw Set', price:199, pts:18, desc:'Reusable steel straw set with cleaner', img:'https://source.unsplash.com/600x600/?steel,straws'},
-        {id:'p5', key:'compost', name:'Compost Bin (Mini)', price:699, pts:70, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
-        {id:'p6', key:'solar', name:'Solar Power Bank', price:1299, pts:120, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
+        {id:'p1', key:'bottle', name:'Reusable Water Bottle', price:99,pts:05,desc:'Insulated Stainless steel bottle',img:'https://source.unsplash.com/600x600/?reusablebottle,water'},
+        {id:'p2', key:'toothbrush', name:'Bamboo Toothbrush (2-pack)', price:99, pts:10,desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
+        {id:'p3', key:'bag', name:'Cloth Shopping Bag', price:75, pts:05, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
+        {id:'p5', key:'compost', name:'Compost Bin (Mini)', price:249, pts:20, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
+        {id:'p6', key:'solar', name:'Solar Power Bank', price:1099, pts:40, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
       ];
     }
 
@@ -428,7 +427,7 @@
     function submitFeedback(){
       const val = document.getElementById('fb').value.trim();
       if(!val){ alert('Please type feedback'); return; }
-      document.getElementById('fbMsg').innerText = 'Thanks for the feedback! 💚';
+      document.getElementById('fbMsg').innerText = 'Thanks for the feedback!';
       document.getElementById('fb').value = '';
     }
 
@@ -440,12 +439,11 @@
       if(!state.products || state.products.length === 0) state.products = JSON.parse(JSON.stringify(state.products));
       // override state.products with the curated list (safer)
       state.products = [
-        {id:'p1', name:'Reusable Water Bottle', price:499, pts:50, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
-        {id:'p2', name:'Bamboo Toothbrush (2-pack)', price:149, pts:20, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
-        {id:'p3', name:'Cloth Shopping Bag', price:299, pts:30, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
-        {id:'p4', name:'Steel Straw Set', price:199, pts:18, desc:'Reusable steel straw set with cleaner', img:'https://source.unsplash.com/600x600/?steel,straws'},
-        {id:'p5', name:'Compost Bin (Mini)', price:699, pts:70, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
-        {id:'p6', name:'Solar Power Bank', price:1299, pts:120, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
+        {id:'p1', name:'Reusable Water Bottle', price:099, pts:05, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
+        {id:'p2', name:'Bamboo Toothbrush (2-pack)', price:099, pts:05, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
+        {id:'p3', name:'Cloth Shopping Bag', price:75, pts:03, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
+        {id:'p5', name:'Compost Bin (Mini)', price:199, pts:20, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
+        {id:'p6', name:'Solar Power Bank', price:1599, pts:50, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
       ];
       save();
       refreshUI();
