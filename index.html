@@ -6,37 +6,38 @@
   <title>Ecolistic Living — Real Shop + Fake Payments</title>
   <style>
     :root{
-      --accent:#1e7a3a; --bg:#f4faf5; --card:#fff; --muted:#6b7a6b;
+      --accent:#1e7a3a; --accent-2:#2ea560; --bg:#f4faf5; --card:#fff; --muted:#6b7a6b;
       font-family:Inter,system-ui,sans-serif;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:#0b2a13;}
-    .app{max-width:520px;margin:8px auto;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;border-radius:12px;}
-    header{background:linear-gradient(90deg,var(--accent),#2ea560);color:#fff;padding:14px 16px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:12px}
+    .app{max-width:760px;margin:8px auto;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;border-radius:12px;overflow:hidden}
+    header{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;padding:14px 16px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:12px}
     header h1{margin:0;font-size:18px}
     main{flex:1;padding:14px}
     .page{display:none}
     .page.active{display:block}
     .card{background:var(--card);padding:12px;border-radius:12px;margin-bottom:12px;box-shadow:0 6px 18px rgba(10,30,10,0.04)}
     .btn{padding:8px 12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
-    .btn.secondary{background:#2ea560}
+    .btn.secondary{background:var(--accent-2)}
     .row{display:flex;gap:10px;align-items:center}
     .muted{color:var(--muted);font-size:13px}
-    .bottom-nav{display:flex;gap:6px;padding:10px;border-top:1px solid rgba(0,0,0,0.06);background:transparent;border-radius:0 0 12px 12px}
-    .tab{flex:1;text-align:center;padding:8px;border-radius:8px;color:var(--accent);font-weight:700;cursor:pointer}
+    .bottom-nav{display:flex;gap:6px;padding:10px;border-top:1px solid rgba(0,0,0,0.06);background:transparent;border-radius:0 0 12px 12px;flex-wrap:wrap}
+    .tab{flex:1;text-align:center;padding:8px;border-radius:8px;color:var(--accent);font-weight:700;cursor:pointer;min-width:90px}
     .tab.active{background:rgba(30,122,58,0.08)}
     video{width:100%;border-radius:10px;background:#000;max-height:360px}
     .thumb{width:64px;height:64px;border-radius:10px;object-fit:cover}
     .product{display:flex;gap:12px;align-items:center;padding:8px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);margin-bottom:10px;background:linear-gradient(180deg,#fff,#f8fff8)}
     .product img{width:84px;height:84px;border-radius:10px;object-fit:cover}
     .price{font-weight:800;color:var(--accent)}
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
-    .modal{width:92%;max-width:420px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.25)}
     .small{font-size:13px;color:var(--muted)}
     .input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6efe6;margin-top:8px}
     .center{text-align:center}
-    @media(min-width:720px){.app{margin:20px auto}}
+    .disabled{opacity:0.45;pointer-events:none}
+    .quiz-option{padding:10px;border-radius:8px;border:1px solid #e6efe6;margin-bottom:8px;cursor:pointer}
+    .quiz-option.correct{border-color:green}
+    .quiz-option.incorrect{border-color:red}
+    @media(min-width:900px){.app{margin:20px auto}}
   </style>
 </head>
 <body>
@@ -45,8 +46,12 @@
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 7 6 7 10C7 13.3137 9.68629 16 13 16C16.3137 16 19 13.3137 19 10C19 6 12 2 12 2Z" fill="white" opacity="0.95"/><path d="M5 20C5 17 8.134 15 11 15H13C15.866 15 19 17 19 20" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
       <div style="flex:1">
         <h1>Ecolistic Living</h1>
-        <div class="muted" style="font-size:200x">Small steps can make a big difference!</div>
-      <div id="pointsTop" style="font-weight:900">0 pts</div>
+        <div class="muted" style="font-size:13px">Small steps — proven with a snap 🌱</div>
+      </div>
+      <div style="text-align:right">
+        <div id="pointsTop" style="font-weight:900">0 pts</div>
+        <div id="premiumBadge" class="small" style="font-weight:700;color:#fff;margin-top:4px">Free</div>
+      </div>
     </header>
 
     <main>
@@ -62,8 +67,8 @@
         </div>
 
         <div class="card">
-          <h3>Your EcoPoints</h3>
-          <div style="font-size:26px;font-weight:900"	id="ecoPoint>0</div>
+          <h3>Your Eco Score</h3>
+          <div style="font-size:26px;font-weight:900" id="ecoScore">0</div>
           <div class="muted">Verify tasks to increase your score and unlock rewards.</div>
         </div>
       </section>
@@ -99,13 +104,48 @@
         </div>
       </section>
 
+      <!-- GAMES (Eco Quiz) -->
+      <section id="games" class="page">
+        <div class="card">
+          <h2>Eco Quiz (Premium Only)</h2>
+          <div id="gameIntro" class="muted"></div>
+          <div id="quizArea" style="margin-top:10px"></div>
+          <div id="gameFooter" style="margin-top:12px"></div>
+        </div>
+      </section>
+
+      <!-- LEARN -->
+      <section id="learn" class="page">
+        <div class="card">
+          <h2>Learn Sustainability</h2>
+          <div style="display:grid;gap:10px">
+            <div class="card" style="padding:10px">
+              <h3>Why sustainability matters</h3>
+              <p class="muted">Sustainability ensures we meet our needs without harming future generations. Small actions add up.</p>
+            </div>
+            <div class="card" style="padding:10px">
+              <h3>Reduce • Reuse • Recycle</h3>
+              <p class="muted">Prioritize reducing waste, reuse items, and recycle what you can. Start with single-use plastics.</p>
+            </div>
+            <div class="card" style="padding:10px">
+              <h3>Save water & energy</h3>
+              <p class="muted">Shorter showers, fixing leaks, switching off unused lights — all help save resources.</p>
+            </div>
+            <div class="card" style="padding:10px">
+              <h3>Daily eco habits</h3>
+              <p class="muted">Bring a reusable bottle/bag, compost kitchen scraps, choose energy-efficient bulbs.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- REWARDS -->
       <section id="rewards" class="page">
         <div class="card">
           <h2>Rewards</h2>
-          <p class="muted">Redeem 150 points → ₹50 voucher (demo).</p>
+          <p class="muted">Redeem <strong>150 points</strong> → ₹50 voucher (demo).</p>
           <div class="row" style="margin-top:8px">
-            <button class="btn" onclick="redeem(150)">Redeem 50 pts</button>
+            <button class="btn" onclick="redeem()">Redeem voucher</button>
             <div id="redeemMsg" class="muted" style="margin-left:8px"></div>
           </div>
         </div>
@@ -115,7 +155,7 @@
       <section id="premium" class="page">
         <div class="card">
           <h2>Premium — ₹99 / month (demo)</h2>
-          <p class="muted">Subscribe to get <strong>2× points</strong> on verified tasks and occasional free vouchers. (Demo flow — no real payment)</p>
+          <p class="muted">Subscribe to get <strong>2× points</strong> on verified tasks and unlock the Eco Quiz (2 plays max). (Demo flow — no real payment)</p>
           <div class="row" style="margin-top:10px">
             <button class="btn" onclick="subscribe()">Subscribe ₹99 (demo)</button>
             <button class="btn secondary" onclick="unsubscribe()">Cancel</button>
@@ -131,12 +171,11 @@
           <p class="muted">Team Ecolistic</p>
           <ul>
             <li>Parth Kandoi</li>
-            <li>Vriti Bhagath</li>
-            <li>Ridhima Paida</li>
+            <li>Vriti</li>
+            <li>Ridhima P</li>
             <li>Nischith Gowda</li>
-            <li>Meera Gupta</li>
-            <li>Reeneka Saha</li>
-	    <li>Ishaan CN</li>
+            <li>Meera G</li>
+            <li>Reeneka</li>
           </ul>
         </div>
       </section>
@@ -159,6 +198,8 @@
       <div class="tab" data-target="progress" onclick="navTab(event)">Progress</div>
       <div class="tab" data-target="scan" onclick="navTab(event)">Scan</div>
       <div class="tab" data-target="shop" onclick="navTab(event)">Shop</div>
+      <div class="tab" data-target="games" onclick="navTab(event)">Games</div>
+      <div class="tab" data-target="learn" onclick="navTab(event)">Learn</div>
       <div class="tab" data-target="rewards" onclick="navTab(event)">Rewards</div>
       <div class="tab" data-target="premium" onclick="navTab(event)">Premium</div>
       <div class="tab" data-target="about" onclick="navTab(event)">About</div>
@@ -166,12 +207,12 @@
     </nav>
   </div>
 
-  <!-- Fake Payment Modal (hidden by default) -->
+  <!-- Modal root -->
   <div id="modalRoot" style="display:none"></div>
 
   <script>
-    /* ------------- State & Persistence ------------- */
-    const STORAGE_KEY = 'ecolistic_v3';
+    /* --------- State & Persistence --------- */
+    const STORAGE_KEY = 'ecolistic_v3_full_final';
     let state = {
       points: 0,
       score: 0,
@@ -182,13 +223,15 @@
         {id:3, text:'Composted waste', done:false, img:''}
       ],
       products: [],
-      pendingScan: null
+      pendingScan: null,
+      gamesPlays: 0,
+      lastQuizSeed: null
     };
 
     function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    function load(){ const s = localStorage.getItem(STORAGE_KEY); if(s) state = JSON.parse(s); }
+    function load(){ const s = localStorage.getItem(STORAGE_KEY); if(s) try { state = JSON.parse(s); } catch(e){} }
 
-    /* ------------- Camera persistence ------------- */
+    /* --------- Camera --------- */
     let stream = null;
     let cameraReady = false;
     async function startCameraIfNeeded(){
@@ -215,7 +258,7 @@
       }
     }
 
-    /* ------------- Navigation ------------- */
+    /* --------- Navigation --------- */
     function navTab(e){
       const id = e.currentTarget.dataset.target;
       document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.target === id));
@@ -229,19 +272,62 @@
       refreshUI();
     }
 
-    /* ------------- Products (matching images via Unsplash queries) ------------- */
+    /* --------- Products (real-looking photos) --------- */
     function loadProductsList(){
-      // Use Unsplash query-based images (these return relevant photos)
+      // All items except power bank <= 99, images curated from Unsplash (direct photo links)
       state.products = [
-        {id:'p1', key:'bottle', name:'Reusable Water Bottle', price:99,pts:05,desc:'Insulated Stainless steel bottle',img:'https://source.unsplash.com/600x600/?reusablebottle,water'},
-        {id:'p2', key:'toothbrush', name:'Bamboo Toothbrush (2-pack)', price:99, pts:10,desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
-        {id:'p3', key:'bag', name:'Cloth Shopping Bag', price:75, pts:05, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
-        {id:'p5', key:'compost', name:'Compost Bin (Mini)', price:249, pts:20, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
-        {id:'p6', key:'solar', name:'Solar Power Bank', price:1099, pts:40, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
+        {
+          id:'p1',
+          name:'Reusable Water Bottle',
+          price:99,
+          pts:18,
+          desc:'Insulated stainless steel bottle',
+          img:'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=600&q=80' /* water bottle */
+        },
+        {
+          id:'p2',
+          name:'Bamboo Toothbrush (2-pack)',
+          price:49,
+          pts:8,
+          desc:'Biodegradable bamboo toothbrushes',
+          img:'https://images.unsplash.com/photo-1556228720-9b3a5c2b8b6a?auto=format&fit=crop&w=600&q=80' /* toothbrush */
+        },
+        {
+          id:'p3',
+          name:'Cloth Shopping Bag',
+          price:69,
+          pts:10,
+          desc:'Organic cotton foldable tote',
+          img:'https://images.unsplash.com/photo-1520975911-4b6c8f9f73a6?auto=format&fit=crop&w=600&q=80' /* cloth bag */
+        },
+        {
+          id:'p4',
+          name:'Steel Straw Set',
+          price:59,
+          pts:6,
+          desc:'Reusable steel straw set with cleaner',
+          img:'https://images.unsplash.com/photo-1543935181-4f2f6e6b917f?auto=format&fit=crop&w=600&q=80' /* straws */
+        },
+        {
+          id:'p5',
+          name:'Compost Bin (Mini)',
+          price:99,
+          pts:22,
+          desc:'Kitchen-friendly compost collector',
+          img:'https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=600&q=80' /* compost bin */
+        },
+        {
+          id:'p6',
+          name:'Solar Power Bank',
+          price:699,
+          pts:40,
+          desc:'Portable solar charger for devices',
+          img:'https://images.unsplash.com/photo-1518307768241-0b1d63ae65f9?auto=format&fit=crop&w=600&q=80' /* solar powerbank */
+        }
       ];
     }
 
-    /* ------------- Renderers ------------- */
+    /* --------- Renderers --------- */
     function renderProducts(){
       const wrap = document.getElementById('productsWrap');
       wrap.innerHTML = '';
@@ -286,9 +372,16 @@
       renderActions();
       renderProducts();
       const submsg = document.getElementById('subMsg'); if(submsg) submsg.innerText = state.premium ? 'Premium active (demo): 2× points enabled.' : 'Not subscribed.';
+      document.getElementById('premiumBadge').innerText = state.premium ? 'Premium' : 'Free';
+      const gi = document.getElementById('gameIntro');
+      if(gi){
+        if(!state.premium) gi.innerText = 'Eco Quiz is available only for Premium users. Subscribe to play and earn bonus points.';
+        else gi.innerText = `You have played the Eco Quiz ${state.gamesPlays} / 2 times. Each correct answer gives points.`;
+      }
+      updateGameHint();
     }
 
-    /* ------------- Scan flow ------------- */
+    /* --------- Scan flow --------- */
     function startProof(actionId){
       state.pendingScan = actionId;
       save();
@@ -310,9 +403,10 @@
         if(act && !act.done){
           act.done = true;
           act.img = dataUrl;
-          const pts = state.premium ? 20 : 10;
+          const basePts = 5;
+          const pts = state.premium ? basePts * 2 : basePts;
           state.points += pts;
-          state.score += 5;
+          state.score += 3;
           state.pendingScan = null;
           save();
           refreshUI();
@@ -326,14 +420,14 @@
       }
     }
 
-    /* ------------- Fake Payment Modal ------------- */
+    /* --------- Fake Payment Modal --------- */
     function openPurchaseModal(productId){
       const p = state.products.find(x => x.id === productId);
       if(!p) return;
       const root = document.getElementById('modalRoot');
       root.innerHTML = `
-        <div class="modal-backdrop" id="modalBack">
-          <div class="modal" role="dialog" aria-modal="true">
+        <div class="modal-backdrop" id="modalBack" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:60">
+          <div class="modal" role="dialog" aria-modal="true" style="width:92%;max-width:420px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
             <div style="display:flex;align-items:center;gap:12px">
               <img src="${p.img}" alt="${p.name}" style="width:84px;height:84px;border-radius:8px;object-fit:cover"/>
               <div style="flex:1">
@@ -364,13 +458,12 @@
     }
 
     function showTinyToast(msg){
-      // small non-blocking message
       const el = document.createElement('div');
       el.style.position='fixed'; el.style.bottom='92px'; el.style.left='50%'; el.style.transform='translateX(-50%)';
       el.style.background='rgba(0,0,0,0.8)'; el.style.color='#fff'; el.style.padding='10px 14px'; el.style.borderRadius='10px'; el.style.zIndex=9999;
       el.innerText = msg;
       document.body.appendChild(el);
-      setTimeout(()=>el.remove(),2600);
+      setTimeout(()=>el.remove(),2400);
     }
 
     function simulatePayment(product){
@@ -379,12 +472,9 @@
       payBtn.disabled = true;
       payBtn.innerText = 'Processing...';
       payStatus.innerText = '';
-      // fake network / processing delay
       setTimeout(() => {
-        // success
         payBtn.innerText = 'Success';
         payStatus.innerText = 'Payment successful ✓';
-        // award points and maybe give "voucher" or order id
         state.points += product.pts;
         state.score += Math.round(product.pts / 4);
         save();
@@ -393,7 +483,7 @@
           closeModal();
           showTinyToast(`Payment success — earned ${product.pts} pts!`);
         }, 700);
-      }, 1400);
+      }, 1200);
     }
 
     function closeModal(){
@@ -401,58 +491,178 @@
       root.innerHTML = ''; root.style.display = 'none';
     }
 
-    /* ------------- Shop / Rewards / Subscribe actions ------------- */
-    function buyProduct(pid){ openPurchaseModal(pid); } // kept for backward compatibility
-
-    function redeem(cost){
+    /* --------- Rewards (150 pts for ₹50) --------- */
+    function redeem(){
       const msg = document.getElementById('redeemMsg');
       msg.innerText = '';
-      if(state.points >= cost){
-        state.points -= cost; save(); refreshUI();
-        msg.innerText = `Redeemed ${cost} pts → ₹${cost} voucher (demo).`;
+      const required = 150;
+      const value = 50;
+      if(state.points >= required){
+        state.points -= required; save(); refreshUI();
+        msg.innerText = `Redeemed ${required} pts → ₹${value} voucher (demo).`;
       } else {
-        msg.innerText = 'Not enough points.';
+        msg.innerText = `Need ${required} pts to redeem ₹${value} voucher.`;
       }
     }
 
+    /* --------- Subscribe --------- */
     function subscribe(){
       if(confirm('Subscribe to Premium for ₹99/month? (Demo — no real payment)')){
-        state.premium = true; save(); refreshUI(); alert('Subscribed to Premium (demo) — 2× points enabled!');
+        state.premium = true; save(); refreshUI(); alert('Subscribed to Premium (demo) — 2× points enabled! You can now access Eco Quiz (2 plays).');
       }
     }
     function unsubscribe(){
       state.premium = false; save(); refreshUI(); alert('Premium cancelled (demo).');
     }
 
+    /* --------- Feedback --------- */
     function submitFeedback(){
       const val = document.getElementById('fb').value.trim();
       if(!val){ alert('Please type feedback'); return; }
-      document.getElementById('fbMsg').innerText = 'Thanks for the feedback!';
+      document.getElementById('fbMsg').innerText = 'Thanks for the feedback! 💚';
       document.getElementById('fb').value = '';
     }
 
-    /* ------------- Init ------------- */
+    /* --------- Games / Quiz --------- */
+    const QUIZ_QUESTIONS = [
+      {q:"Which of these is the best first step to reduce plastic waste?", choices:["Recycle everything","Use reusable bags and bottles","Burn plastic"], a:1},
+      {q:"Which energy source is renewable?", choices:["Coal","Solar","Oil"], a:1},
+      {q:"Composting helps by:", choices:["Adding to landfill","Reducing organic waste and creating fertilizer","Using more water"], a:1},
+      {q:"Which is a water-saving habit?", choices:["Leaving tap running","Fixing leaks and shorter showers","Washing full loads only sometimes"], a:1},
+      {q:"What does 'reduce' mean in 'Reduce, Reuse, Recycle'?", choices:["Buy more to have choices","Avoid single-use items","Throw away unused items"], a:1},
+      {q:"Which action reduces food waste?", choices:["Planning meals and storing food properly","Buying more than needed","Forgetting leftovers"], a:0},
+      {q:"Which is NOT biodegradable?", choices:["Paper","Glass","Banana peel"], a:1},
+      {q:"Which transport choice is generally most eco-friendly for short trips?", choices:["Car solo","Walking or cycling","Helicopter"], a:1},
+      {q:"Which practice saves electricity at home?", choices:["Leaving lights on","Using LED bulbs and switching off unused devices","Overcharging devices"], a:1},
+      {q:"Planting native trees helps because:", choices:["They adapt well and support local ecosystems","They need more water","They attract pests"], a:0}
+    ];
+
+    function canPlayQuiz(){
+      return state.premium && state.gamesPlays < 2;
+    }
+
+    function startQuiz(){
+      if(!state.premium){ alert('Eco Quiz is for Premium users only. Subscribe to play.'); return; }
+      if(state.gamesPlays >= 2){ alert('You have used your 2 plays.'); return; }
+      const shuffled = QUIZ_QUESTIONS.slice().sort(()=>0.5-Math.random());
+      const qs = shuffled.slice(0,5);
+      renderQuiz(qs);
+    }
+
+    function renderQuiz(questions){
+      const area = document.getElementById('quizArea');
+      area.innerHTML = '';
+      let current = 0;
+      let correctCount = 0;
+
+      function showQuestion(i){
+        area.innerHTML = '';
+        const q = questions[i];
+        const qCard = document.createElement('div');
+        qCard.innerHTML = `<div style="font-weight:800">${i+1}. ${q.q}</div><div style="margin-top:8px"></div>`;
+        const choicesWrap = document.createElement('div');
+        q.choices.forEach((c, idx) => {
+          const opt = document.createElement('div');
+          opt.className = 'quiz-option';
+          opt.innerText = c;
+          opt.onclick = () => {
+            const allOpts = choicesWrap.querySelectorAll('.quiz-option');
+            allOpts.forEach(o=>o.style.pointerEvents='none');
+            if(idx === q.a){
+              opt.classList.add('correct');
+              correctCount++;
+            } else {
+              opt.classList.add('incorrect');
+              allOpts.forEach((o2,ii)=>{ if(ii === q.a) o2.classList.add('correct'); });
+            }
+            setTimeout(()=>{
+              current++;
+              if(current < questions.length) showQuestion(current);
+              else finishQuiz();
+            },900);
+          };
+          choicesWrap.appendChild(opt);
+        });
+        qCard.appendChild(choicesWrap);
+        area.appendChild(qCard);
+      }
+
+      function finishQuiz(){
+        const perCorrect = 6;
+        const earned = correctCount * perCorrect;
+        state.points += earned;
+        state.score += Math.round(earned/3);
+        state.gamesPlays = (state.gamesPlays || 0) + 1;
+        save();
+        refreshUI();
+        area.innerHTML = `<div style="font-weight:800">Quiz complete</div>
+          <div class="muted" style="margin-top:8px">You answered ${correctCount} / ${questions.length} correctly and earned ${earned} pts.</div>`;
+        const footer = document.getElementById('gameFooter');
+        footer.innerHTML = `<div style="margin-top:8px"><button class="btn" onclick="navigate('games')">Back</button></div>`;
+      }
+
+      showQuestion(0);
+    }
+
+    /* --------- Init --------- */
     function init(){
       load();
-      loadProductsList(); // fill product images/metadata
-      // ensure state.products uses our list (so points/prices match)
-      if(!state.products || state.products.length === 0) state.products = JSON.parse(JSON.stringify(state.products));
-      // override state.products with the curated list (safer)
-      state.products = [
-        {id:'p1', name:'Reusable Water Bottle', price:099, pts:05, desc:'Insulated stainless steel bottle', img:'https://source.unsplash.com/600x600/?reusable,bottle,water'},
-        {id:'p2', name:'Bamboo Toothbrush (2-pack)', price:099, pts:05, desc:'Biodegradable bamboo toothbrushes', img:'https://source.unsplash.com/600x600/?bamboo,toothbrush'},
-        {id:'p3', name:'Cloth Shopping Bag', price:75, pts:03, desc:'Organic cotton foldable tote', img:'https://source.unsplash.com/600x600/?cloth,tote,bag'},
-        {id:'p5', name:'Compost Bin (Mini)', price:199, pts:20, desc:'Kitchen-friendly compost collector', img:'https://source.unsplash.com/600x600/?compost,bin,kitchen'},
-        {id:'p6', name:'Solar Power Bank', price:1099, pts:50, desc:'Portable solar charger for devices', img:'https://source.unsplash.com/600x600/?solar,powerbank,charger'}
-      ];
+      loadProductsList();
+      if(typeof state.gamesPlays !== 'number') state.gamesPlays = 0;
       save();
       refreshUI();
+
+      const gf = document.getElementById('gameFooter');
+      gf.innerHTML = '';
+      const playBtn = document.createElement('button');
+      playBtn.className = 'btn';
+      playBtn.innerText = 'Play Eco Quiz';
+      playBtn.onclick = () => {
+        if(!state.premium){
+          if(confirm('Eco Quiz is for Premium users. Subscribe now (demo)?')) subscribe();
+          return;
+        }
+        if(state.gamesPlays >= 2){ alert('You have used your 2 plays.'); return; }
+        startQuiz();
+      };
+      gf.appendChild(playBtn);
+
+      const hint = document.createElement('div');
+      hint.className = 'muted';
+      hint.style.marginTop = '8px';
+      hint.id = 'gameHint';
+      gf.appendChild(hint);
+
+      updateGameHint();
       window.addEventListener('beforeunload', stopCamera);
     }
 
-    // run
-    init();
+    function updateGameHint(){
+      const hint = document.getElementById('gameHint');
+      if(!hint) return;
+      hint.innerText = state.premium ? `Plays used: ${state.gamesPlays} / 2` : 'Subscribe to Premium to play the Eco Quiz (2 plays).';
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    // ensure refreshUI updates hint when state changes
+    const origSave = save;
+    save = function(){ origSave(); updateGameHint(); };
+
+    // expose functions
+    window.navigate = navigate;
+    window.navTab = navTab;
+    window.startProof = startProof;
+    window.takeSnapshot = takeSnapshot;
+    window.stopCamera = stopCamera;
+    window.openPurchaseModal = openPurchaseModal;
+    window.closeModal = closeModal;
+    window.redeem = redeem;
+    window.subscribe = subscribe;
+    window.unsubscribe = unsubscribe;
+    window.submitFeedback = submitFeedback;
+    window.startQuiz = startQuiz;
+    window.canPlayQuiz = canPlayQuiz;
   </script>
 </body>
 </html>
-
