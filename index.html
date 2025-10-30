@@ -41,6 +41,7 @@
   </style>
 </head>
 <body>
+  <script src='https://www.noupe.com/embed/019a330689477e358d2e4b20055d43ef5b85.js'></script>c
   <div class="app" role="application">
     <header>
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 7 6 7 10C7 13.3137 9.68629 16 13 16C16.3137 16 19 13.3137 19 10C19 6 12 2 12 2Z" fill="white" opacity="0.95"/><path d="M5 20C5 17 8.134 15 11 15H13C15.866 15 19 17 19 20" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/></svg>
@@ -85,11 +86,11 @@
       <!-- SCAN -->
       <section id="scan" class="page">
         <div class="card">
-          <h2>Scan Proof</h2>
+          <h2>Scan Waste</h2>
           <video id="video" autoplay playsinline muted></video>
           <canvas id="snap" style="display:none"></canvas>
           <div class="row" style="margin-top:8px">
-            <button class="btn" onclick="takeSnapshot()">📸 Capture Proof</button>
+            <button class="btn" onclick="takeSnapshot()">📸 Capture Waste</button>
             <button style="padding:8px 12px;background:#eee;border-radius:10px;border:0;cursor:pointer" onclick="stopCamera()">Stop Camera</button>
           </div>
           <div id="scanInfo" class="muted" style="margin-top:8px"></div>
@@ -392,7 +393,7 @@
 
     function takeSnapshot(){
       if(!stream){ alert('Camera not available. Please allow camera permission and try again.'); return; }
-      const video = document.getElementById('video');
+      const video = document.getElementById0('video');
       const canvas = document.getElementById('snap');
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
